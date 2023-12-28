@@ -1,10 +1,10 @@
+bcrypt
+databases[asyncmy]
 fastapi
+orjson
 pydantic
 python-dotenv
 python-json-logger
 pyyaml
-uvicorn
-databases[asyncmy]
-orjson
-bcrypt
 redis
+uvicorn

@@ -8,8 +8,10 @@ load_dotenv()
 def read_bool(value: str) -> bool:
     return value.lower() in ("1", "true")
 
+
 def read_list(value: str) -> list[str]:
     return value.split(",")
+
 
 APP_ENV = os.environ["APP_ENV"]
 APP_HOST = os.environ["APP_HOST"]
@@ -36,4 +38,6 @@ REDIS_USE_SSL = read_bool(os.environ["REDIS_USE_SSL"])
 ALLOWED_LAZER_CLIENT_IDS = read_list(os.environ["ALLOWED_LAZER_CLIENT_IDS"])
 ALLOWED_LAZER_CLIENT_SECRETS = read_list(os.environ["ALLOWED_LAZER_CLIENT_SECRETS"])
 
-OAUTH_ACCESS_TOKEN_VALIDITY_SECONDS = int(os.environ["OAUTH_ACCESS_TOKEN_VALIDITY_SECONDS"])
+OAUTH_ACCESS_TOKEN_VALIDITY_SECONDS = int(
+    os.environ["OAUTH_ACCESS_TOKEN_VALIDITY_SECONDS"],
+)

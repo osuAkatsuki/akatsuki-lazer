@@ -1,24 +1,32 @@
-from fastapi.responses import ORJSONResponse
-from fastapi import APIRouter
-from fastapi import Form
-
 import secrets
 from datetime import datetime
 from datetime import timedelta
 
+from fastapi import APIRouter
+from fastapi import Form
+from fastapi.responses import ORJSONResponse
+
 import settings
-from app.repositories import api_sessions as api_sessions_repository
 from app.adapters import cryptography as cryptography_adapter
-from app.repositories import users as users_repository
 from app.adapters import password as password_adapter
-from app.api.dtos.oauth import OAuthFailureResponse, OAuthSuccessResponse, OAuthUnauthorizedResponse
-from app.models.api_scope import ApiScope
-from app.models.api_hint import ApiHint
 from app.api import responses
+from app.api.dtos.oauth import OAuthFailureResponse
+from app.api.dtos.oauth import OAuthSuccessResponse
+from app.api.dtos.oauth import OAuthUnauthorizedResponse
+from app.models.api_hint import ApiHint
+from app.models.api_scope import ApiScope
+from app.repositories import api_sessions as api_sessions_repository
+from app.repositories import users as users_repository
 
 router = APIRouter(default_response_class=ORJSONResponse)
 
-@router.post("/oauth/token", response_model=OAuthSuccessResponse | OAuthFailureResponse | OAuthUnauthorizedResponse)
+
+@router.post(
+    "/oauth/token",
+    response_model=OAuthSuccessResponse
+    | OAuthFailureResponse
+    | OAuthUnauthorizedResponse,
+)
 async def oauth_token(
     username: str | None = Form(None),
     password: str | None = Form(None),
@@ -27,7 +35,9 @@ async def oauth_token(
     client_secret: str = Form(...),
     scope: str = Form(...),
 ):
-    requested_scopes = [ApiScope(requested_scope) for requested_scope in scope.split(",")]
+    requested_scopes = [
+        ApiScope(requested_scope) for requested_scope in scope.split(",")
+    ]
 
     # if it's a lazer client then it must have ApiScope.ALL
     # we will maybe support oauth for non lazer clients at some point
@@ -38,7 +48,10 @@ async def oauth_token(
     # ref: https://github.com/ppy/osu/blob/master/osu.Game/Online/DevelopmentEndpointConfiguration.cs
     # ref: https://github.com/ppy/osu/blob/master/osu.Game/Online/ExperimentalEndpointConfiguration.cs
     # ref: https://github.com/ppy/osu/blob/master/osu.Game/Online/ProductionEndpointConfiguration.cs
-    if client_id not in settings.ALLOWED_LAZER_CLIENT_IDS or client_secret not in settings.ALLOWED_LAZER_CLIENT_SECRETS:
+    if (
+        client_id not in settings.ALLOWED_LAZER_CLIENT_IDS
+        or client_secret not in settings.ALLOWED_LAZER_CLIENT_SECRETS
+    ):
         return responses.create_unauthorized_response()
 
     # lazer can only use the password grant type
@@ -47,22 +60,33 @@ async def oauth_token(
         return responses.create_unauthorized_response()
 
     if username is None or password is None:
-        return responses.create_oauth_failure_response(hint=ApiHint.USERNAME_OR_PASSWORD_INCORRECT)
-    
+        return responses.create_oauth_failure_response(
+            hint=ApiHint.USERNAME_OR_PASSWORD_INCORRECT,
+        )
+
     password_md5 = cryptography_adapter.calculate_md5(password)
 
     user = await users_repository.get_by_username(username)
     if user is None:
-        return responses.create_oauth_failure_response(hint=ApiHint.USERNAME_OR_PASSWORD_INCORRECT)
-    
-    correct_password = await password_adapter.verify_password(password_md5, user.hashed_password)
+        return responses.create_oauth_failure_response(
+            hint=ApiHint.USERNAME_OR_PASSWORD_INCORRECT,
+        )
+
+    correct_password = await password_adapter.verify_password(
+        password_md5,
+        user.hashed_password,
+    )
     if not correct_password:
-        return responses.create_oauth_failure_response(hint=ApiHint.USERNAME_OR_PASSWORD_INCORRECT)
-    
+        return responses.create_oauth_failure_response(
+            hint=ApiHint.USERNAME_OR_PASSWORD_INCORRECT,
+        )
+
     access_token = secrets.token_urlsafe(16)
     refresh_token = secrets.token_urlsafe(16)
-    expires_at = datetime.utcnow() + timedelta(seconds=settings.OAUTH_ACCESS_TOKEN_VALIDITY_SECONDS)
-    
+    expires_at = datetime.utcnow() + timedelta(
+        seconds=settings.OAUTH_ACCESS_TOKEN_VALIDITY_SECONDS,
+    )
+
     api_session = await api_sessions_repository.add(
         token_type="Bearer",
         access_token=access_token,

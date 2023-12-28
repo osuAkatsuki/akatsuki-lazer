@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ApiScope(str, Enum):
     PUBLIC = "public"
     IDENTIFY = "identify"
