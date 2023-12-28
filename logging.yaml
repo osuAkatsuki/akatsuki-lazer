@@ -1,0 +1,20 @@
+version: 1
+disable_existing_loggers: true
+loggers:
+  app_logger:
+    level: INFO
+    handlers: [console]
+    propagate: no
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: json
+    stream: ext://sys.stdout
+formatters:
+  json:
+    class: pythonjsonlogger.jsonlogger.JsonFormatter
+    format: '%(asctime)s %(name)s %(levelname)s %(message)s'
+root:
+  level: INFO
+  handlers: [console]

@@ -1,0 +1,34 @@
+apps:
+  - name: akatsuki-lazer-api
+    environment: production
+    codebase: akatsuki-lazer
+    replicaCount: 1
+    container:
+      image:
+        repository: osuakatsuki/akatsuki-lazer
+        tag: latest
+      port: 80
+      readinessProbe:
+        httpGet:
+          path: /_health
+          port: 80
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 1
+        successThreshold: 1
+        failureThreshold: 3
+      resources:
+        limits:
+          cpu: 300m
+          memory: 250Mi
+        requests:
+          cpu: 150m
+          memory: 150Mi
+      env:
+        - name: APP_COMPONENT
+          value: api
+      imagePullSecrets:
+        - name: osuakatsuki-registry-secret
+    service:
+      type: ClusterIP
+      port: 80

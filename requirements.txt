@@ -1,0 +1,10 @@
+fastapi
+pydantic
+python-dotenv
+python-json-logger
+pyyaml
+uvicorn
+databases[asyncmy]
+orjson
+bcrypt
+redis
