@@ -7,8 +7,7 @@ if [ -z "$APP_ENV" ]; then
 fi
 
 if [[ $PULL_SECRETS_FROM_VAULT -eq 1 ]]; then
-  # TODO: revert to $APP_ENV
-  akatsuki vault get akatsuki-lazer production-k8s -o .env
+  akatsuki vault get akatsuki-lazer $APP_ENV -o .env
   source .env
 fi
 
